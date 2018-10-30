@@ -1,10 +1,5 @@
 version: '3.4'
 
-# NOTE: Cassandra service takes a while to start (~1 minute).
-# So the Kafka and Cassandra service cannot be "linked" directly
-# to go-eventstore-query, some delay is required after starting Zookeeper,
-# Kafka, and Cassandra before go-eventstore-query can be started and used.
-# See the run_test.sh file.
 services:
   cassandra:
     image: cassandra:latest

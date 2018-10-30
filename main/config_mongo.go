@@ -14,13 +14,34 @@ import (
 )
 
 func loadMongoConfig() (*poll.MongoConfig, error) {
-	hosts := *commonutil.ParseHosts(
-		os.Getenv("MONGO_HOSTS"),
-	)
+	conn, err := getMongoConn()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	database := os.Getenv("MONGO_DATABASE")
 	aggCollection := os.Getenv("MONGO_AGG_COLLECTION")
 	metaCollection := os.Getenv("MONGO_META_COLLECTION")
+
+	aggMongoCollection, err := createMongoCollection(conn, database, aggCollection)
+	if err != nil {
+		err = errors.Wrap(err, "Error creating MongoCollection")
+		return nil, err
+	}
+
+	return &poll.MongoConfig{
+		AggregateID:        user.AggregateID,
+		AggCollection:      aggMongoCollection,
+		Connection:         conn,
+		MetaDatabaseName:   database,
+		MetaCollectionName: metaCollection,
+	}, nil
+}
+
+func getMongoConn() (*mongo.ConnectionConfig, error) {
+	hosts := *commonutil.ParseHosts(
+		os.Getenv("MONGO_HOSTS"),
+	)
 
 	username := os.Getenv("MONGO_USERNAME")
 	password := os.Getenv("MONGO_PASSWORD")
@@ -44,7 +65,7 @@ func loadMongoConfig() (*poll.MongoConfig, error) {
 	client, err := mongo.NewClient(mongoConfig)
 	if err != nil {
 		err = errors.Wrap(err, "Error creating MongoClient")
-		log.Fatalln(err)
+		return nil, err
 	}
 
 	resTimeoutStr := os.Getenv("MONGO_CONNECTION_TIMEOUT_MS")
@@ -60,19 +81,7 @@ func loadMongoConfig() (*poll.MongoConfig, error) {
 		Timeout: uint32(resTimeout),
 	}
 
-	aggMongoCollection, err := createMongoCollection(conn, database, aggCollection)
-	if err != nil {
-		err = errors.Wrap(err, "Error creating MongoCollection")
-		return nil, err
-	}
-
-	return &poll.MongoConfig{
-		AggregateID:        user.AggregateID,
-		AggCollection:      aggMongoCollection,
-		Connection:         conn,
-		MetaDatabaseName:   database,
-		MetaCollectionName: metaCollection,
-	}, nil
+	return conn, nil
 }
 
 func createMongoCollection(
