@@ -4,10 +4,6 @@ cd test
 echo "===> Changing directory to \"./test\""
 
 docker-compose up -d --build --force-recreate cassandra kafka mongo
-rc=$?
-if [[ $rc != 0 ]]
-  then exit $rc
-fi
 
 function ping_cassandra() {
   docker exec -it cassandra /usr/bin/nodetool status | grep UN
@@ -36,7 +32,7 @@ else
 fi
 
 echo "Waiting additional time for Cassandra to be ready."
-add_wait=20
+add_wait=30
 cur_add_wait=0
 while (( ++cur_add_wait != add_wait ))
 do
@@ -57,5 +53,9 @@ sleep 5
 
 docker ps -a
 
-docker-compose up --build --force-recreate agg-userauth-cmd-test
-exit $?
+docker-compose up --exit-code-from  agg-userauth-cmd-test
+rc=$?
+if [[ $rc != 0 ]]
+  docker ps -a
+  then exit $rc
+fi

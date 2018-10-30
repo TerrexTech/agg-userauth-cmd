@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/TerrexTech/uuuid"
+
 	"github.com/TerrexTech/go-eventstore-models/model"
 	"github.com/TerrexTech/go-mongoutils/mongo"
 	"github.com/pkg/errors"
@@ -64,7 +66,7 @@ func Update(collection *mongo.Collection, event *model.Event) *model.KafkaRespon
 		}
 	}
 
-	if update["userID"] != nil && update["userID"] == "" {
+	if update["userID"] != nil && update["userID"] == (uuuid.UUID{}).String() {
 		err = errors.New("found blank userID in update")
 		err = errors.Wrap(err, "Update")
 		log.Println(err)
