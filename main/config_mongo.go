@@ -98,6 +98,15 @@ func createMongoCollection(
 			IsUnique: true,
 			Name:     "userID_index",
 		},
+		mongo.IndexConfig{
+			ColumnConfig: []mongo.IndexColumnConfig{
+				mongo.IndexColumnConfig{
+					Name: "userName",
+				},
+			},
+			IsUnique: true,
+			Name:     "userName_index",
+		},
 	}
 
 	// Create New Collection
