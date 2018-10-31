@@ -19,39 +19,30 @@ type User struct {
 	Email     string            `bson:"email,omitempty" json:"email,omitempty"`
 	FirstName string            `bson:"first_name,omitempty" json:"first_name,omitempty"`
 	LastName  string            `bson:"last_name,omitempty" json:"last_name,omitempty"`
-	Username  string            `bson:"username,omitempty" json:"username,omitempty"`
+	UserName  string            `bson:"userName,omitempty" json:"userName,omitempty"`
 	Password  string            `bson:"password,omitempty" json:"password,omitempty"`
-	Roles     []string          `bson:"roles,omitempty" json:"roles,omitempty"`
-}
-
-// marshalUser is a simplified User, for convenient marshalling/unmarshalling operations
-type marshalUser struct {
-	ID        objectid.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-	UserID    string            `bson:"userID,omitempty" json:"userID,omitempty"`
-	Email     string            `bson:"email,omitempty" json:"email,omitempty"`
-	FirstName string            `bson:"firstName,omitempty" json:"firstName,omitempty"`
-	LastName  string            `bson:"lastName,omitempty" json:"lastName,omitempty"`
-	Username  string            `bson:"username,omitempty" json:"username,omitempty"`
-	Password  string            `bson:"password,omitempty" json:"password,omitempty"`
-	Roles     []string          `bson:"roles,omitempty" json:"roles,omitempty"`
+	Role      string            `bson:"role,omitempty" json:"role,omitempty"`
 }
 
 // MarshalBSON returns bytes of BSON-type.
 func (u *User) MarshalBSON() ([]byte, error) {
-	mu := &marshalUser{
-		ID:        u.ID,
-		UserID:    u.UserID.String(),
-		FirstName: u.FirstName,
-		LastName:  u.LastName,
-		Email:     u.Email,
-		Username:  u.Username,
-		Password:  u.Password,
-		Roles:     u.Roles,
+	mu := map[string]interface{}{
+		"firstName": u.FirstName,
+		"lastName":  u.LastName,
+		"email":     u.Email,
+		"userName":  u.UserName,
+		"password":  u.Password,
+		"role":      u.Role,
+		"userID":    u.UserID.String(),
+	}
+
+	if u.ID != objectid.NilObjectID {
+		mu["_id"] = u.ID
 	}
 
 	m, err := bson.Marshal(mu)
 	if err != nil {
-		err = errors.Wrap(err, "MarshalBSON Error")
+		err = errors.Wrap(err, "MarshalJSON Error")
 	}
 	return m, err
 }
@@ -62,9 +53,9 @@ func (u *User) MarshalJSON() ([]byte, error) {
 		"firstName": u.FirstName,
 		"lastName":  u.LastName,
 		"email":     u.Email,
-		"username":  u.Username,
+		"userName":  u.UserName,
 		"password":  u.Password,
-		"roles":     u.Roles,
+		"role":      u.Role,
 		"userID":    u.UserID.String(),
 	}
 
@@ -154,8 +145,8 @@ func (u *User) unmarshalFromMap(m map[string]interface{}) error {
 			return errors.New("Error while asserting LastName")
 		}
 	}
-	if m["username"] != nil {
-		u.Username, assertOK = m["username"].(string)
+	if m["userName"] != nil {
+		u.UserName, assertOK = m["userName"].(string)
 		if !assertOK {
 			return errors.New("Error while asserting Username")
 		}
@@ -166,16 +157,11 @@ func (u *User) unmarshalFromMap(m map[string]interface{}) error {
 			return errors.New("Error while asserting Password")
 		}
 	}
-	if m["roles"] != nil {
-		roles := []string{}
-		for _, r := range m["roles"].([]interface{}) {
-			role, assertOK := r.(string)
-			if !assertOK {
-				return errors.New("Error while asserting Role")
-			}
-			roles = append(roles, role)
+	if m["role"] != nil {
+		u.Role, assertOK = m["role"].(string)
+		if !assertOK {
+			return errors.New("Error while asserting Role")
 		}
-		u.Roles = roles
 	}
 
 	return nil

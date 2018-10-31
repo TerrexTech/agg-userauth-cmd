@@ -89,9 +89,9 @@ var _ = Describe("UserAuthAggregate", func() {
 			FirstName: "test-first",
 			LastName:  "test-last",
 			Email:     "test-email",
-			Username:  "test-username",
+			UserName:  "test-username",
 			Password:  "test-password",
-			Roles:     []string{"test-user"},
+			Role:      "test-user",
 		}
 		marshalUser, err := json.Marshal(mockUser)
 		Expect(err).ToNot(HaveOccurred())
@@ -179,7 +179,7 @@ var _ = Describe("UserAuthAggregate", func() {
 				"userID": mockUser.UserID,
 			}
 			mockUser.FirstName = "new-firstname"
-			mockUser.Username = "new-password"
+			mockUser.UserName = "new-password"
 			// Remove ObjectID because this is not passed from gateway
 			mockID := mockUser.ID
 			mockUser.ID = objectid.NilObjectID
