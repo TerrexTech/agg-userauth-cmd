@@ -63,7 +63,7 @@ func Insert(collection *mongo.Collection, event *model.Event) *model.KafkaRespon
 			UUID:          event.TimeUUID,
 		}
 	}
-	if user.Username == "" {
+	if user.UserName == "" {
 		err = errors.New("missing Username")
 		err = errors.Wrap(err, "Insert")
 		log.Println(err)
@@ -87,8 +87,8 @@ func Insert(collection *mongo.Collection, event *model.Event) *model.KafkaRespon
 			UUID:          event.TimeUUID,
 		}
 	}
-	if user.Roles == nil || len(user.Roles) == 0 {
-		err = errors.New("missing Roles")
+	if user.Role == "" {
+		err = errors.New("missing Role")
 		err = errors.Wrap(err, "Insert")
 		log.Println(err)
 		return &model.KafkaResponse{
