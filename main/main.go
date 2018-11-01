@@ -81,8 +81,8 @@ func main() {
 
 	for {
 		select {
-		case err := <-eventPoll.Wait():
-			err = errors.Wrap(err, "A critical error occurred")
+		case <-eventPoll.RoutinesCtx().Done():
+			err = errors.New("service-context closed")
 			log.Fatalln(err)
 
 		case eventResp := <-eventPoll.Delete():
