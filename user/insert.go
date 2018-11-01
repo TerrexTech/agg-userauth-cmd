@@ -28,16 +28,19 @@ func Insert(collection *mongo.Collection, event *model.Event) *model.KafkaRespon
 	}
 
 	if user.UserID == (uuuid.UUID{}) {
-		err = errors.New("missing UserID")
-		err = errors.Wrap(err, "Insert")
-		log.Println(err)
-		return &model.KafkaResponse{
-			AggregateID:   event.AggregateID,
-			CorrelationID: event.CorrelationID,
-			Error:         err.Error(),
-			ErrorCode:     InternalError,
-			UUID:          event.TimeUUID,
+		userID, err := uuuid.NewV4()
+		if err != nil {
+			err = errors.Wrap(err, "Insert: Error generating UserID")
+			log.Println(err)
+			return &model.KafkaResponse{
+				AggregateID:   event.AggregateID,
+				CorrelationID: event.CorrelationID,
+				Error:         err.Error(),
+				ErrorCode:     InternalError,
+				UUID:          event.TimeUUID,
+			}
 		}
+		user.UserID = userID
 	}
 	if user.FirstName == "" {
 		err = errors.New("missing FirstName")
