@@ -65,37 +65,6 @@ var _ = Describe("UserAggregate", func() {
 			}
 		})
 
-		It("should return error if userID is empty", func() {
-			user.UserID = uuuid.UUID{}
-			marshalUser, err := json.Marshal(user)
-			Expect(err).ToNot(HaveOccurred())
-
-			timeUUID, err := uuuid.NewV1()
-			Expect(err).ToNot(HaveOccurred())
-			cid, err := uuuid.NewV4()
-			Expect(err).ToNot(HaveOccurred())
-			uid, err := uuuid.NewV4()
-			Expect(err).ToNot(HaveOccurred())
-
-			mockEvent := &model.Event{
-				Action:        "insert",
-				CorrelationID: cid,
-				AggregateID:   1,
-				Data:          marshalUser,
-				Timestamp:     time.Now(),
-				UserUUID:      uid,
-				TimeUUID:      timeUUID,
-				Version:       3,
-				YearBucket:    2018,
-			}
-			kr := Insert(nil, mockEvent)
-			Expect(kr.AggregateID).To(Equal(mockEvent.AggregateID))
-			Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
-			Expect(kr.Error).ToNot(BeEmpty())
-			Expect(kr.ErrorCode).To(Equal(int16(InternalError)))
-			Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
-		})
-
 		It("should return error if firstName is empty", func() {
 			user.FirstName = ""
 			marshalUser, err := json.Marshal(user)
