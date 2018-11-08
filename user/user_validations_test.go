@@ -20,7 +20,7 @@ func TestUser(t *testing.T) {
 var _ = Describe("UserAggregate", func() {
 	Describe("delete", func() {
 		It("should return error if filter is empty", func() {
-			timeUUID, err := uuuid.NewV1()
+			UUID, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
 			cid, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
@@ -28,13 +28,13 @@ var _ = Describe("UserAggregate", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			mockEvent := &model.Event{
-				Action:        "delete",
+				EventAction:   "delete",
 				CorrelationID: cid,
 				AggregateID:   AggregateID,
 				Data:          []byte("{}"),
-				Timestamp:     time.Now(),
+				NanoTime:      time.Now().UnixNano(),
 				UserUUID:      uid,
-				TimeUUID:      timeUUID,
+				UUID:          UUID,
 				Version:       3,
 				YearBucket:    2018,
 			}
@@ -43,7 +43,7 @@ var _ = Describe("UserAggregate", func() {
 			Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
 			Expect(kr.Error).ToNot(BeEmpty())
 			Expect(kr.ErrorCode).To(Equal(int16(InternalError)))
-			Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+			Expect(kr.UUID).To(Equal(mockEvent.UUID))
 		})
 	})
 
@@ -70,7 +70,7 @@ var _ = Describe("UserAggregate", func() {
 			marshalUser, err := json.Marshal(user)
 			Expect(err).ToNot(HaveOccurred())
 
-			timeUUID, err := uuuid.NewV1()
+			UUID, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
 			cid, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
@@ -78,13 +78,13 @@ var _ = Describe("UserAggregate", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			mockEvent := &model.Event{
-				Action:        "insert",
+				EventAction:   "insert",
 				CorrelationID: cid,
 				AggregateID:   1,
 				Data:          marshalUser,
-				Timestamp:     time.Now(),
+				NanoTime:      time.Now().UnixNano(),
 				UserUUID:      uid,
-				TimeUUID:      timeUUID,
+				UUID:          UUID,
 				Version:       3,
 				YearBucket:    2018,
 			}
@@ -93,7 +93,7 @@ var _ = Describe("UserAggregate", func() {
 			Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
 			Expect(kr.Error).ToNot(BeEmpty())
 			Expect(kr.ErrorCode).To(Equal(int16(InternalError)))
-			Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+			Expect(kr.UUID).To(Equal(mockEvent.UUID))
 		})
 
 		It("should return error if email is empty", func() {
@@ -101,7 +101,7 @@ var _ = Describe("UserAggregate", func() {
 			marshalUser, err := json.Marshal(user)
 			Expect(err).ToNot(HaveOccurred())
 
-			timeUUID, err := uuuid.NewV1()
+			UUID, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
 			cid, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
@@ -109,13 +109,13 @@ var _ = Describe("UserAggregate", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			mockEvent := &model.Event{
-				Action:        "insert",
+				EventAction:   "insert",
 				CorrelationID: cid,
 				AggregateID:   1,
 				Data:          marshalUser,
-				Timestamp:     time.Now(),
+				NanoTime:      time.Now().UnixNano(),
 				UserUUID:      uid,
-				TimeUUID:      timeUUID,
+				UUID:          UUID,
 				Version:       3,
 				YearBucket:    2018,
 			}
@@ -124,7 +124,7 @@ var _ = Describe("UserAggregate", func() {
 			Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
 			Expect(kr.Error).ToNot(BeEmpty())
 			Expect(kr.ErrorCode).To(Equal(int16(InternalError)))
-			Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+			Expect(kr.UUID).To(Equal(mockEvent.UUID))
 		})
 
 		It("should return error if username is empty", func() {
@@ -132,7 +132,7 @@ var _ = Describe("UserAggregate", func() {
 			marshalUser, err := json.Marshal(user)
 			Expect(err).ToNot(HaveOccurred())
 
-			timeUUID, err := uuuid.NewV1()
+			UUID, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
 			cid, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
@@ -140,13 +140,13 @@ var _ = Describe("UserAggregate", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			mockEvent := &model.Event{
-				Action:        "insert",
+				EventAction:   "insert",
 				CorrelationID: cid,
 				AggregateID:   1,
 				Data:          marshalUser,
-				Timestamp:     time.Now(),
+				NanoTime:      time.Now().UnixNano(),
 				UserUUID:      uid,
-				TimeUUID:      timeUUID,
+				UUID:          UUID,
 				Version:       3,
 				YearBucket:    2018,
 			}
@@ -155,7 +155,7 @@ var _ = Describe("UserAggregate", func() {
 			Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
 			Expect(kr.Error).ToNot(BeEmpty())
 			Expect(kr.ErrorCode).To(Equal(int16(InternalError)))
-			Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+			Expect(kr.UUID).To(Equal(mockEvent.UUID))
 		})
 
 		It("should return error if role is empty", func() {
@@ -163,7 +163,7 @@ var _ = Describe("UserAggregate", func() {
 			marshalUser, err := json.Marshal(user)
 			Expect(err).ToNot(HaveOccurred())
 
-			timeUUID, err := uuuid.NewV1()
+			UUID, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
 			cid, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
@@ -171,13 +171,13 @@ var _ = Describe("UserAggregate", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			mockEvent := &model.Event{
-				Action:        "insert",
+				EventAction:   "insert",
 				CorrelationID: cid,
 				AggregateID:   1,
 				Data:          marshalUser,
-				Timestamp:     time.Now(),
+				NanoTime:      time.Now().UnixNano(),
 				UserUUID:      uid,
-				TimeUUID:      timeUUID,
+				UUID:          UUID,
 				Version:       3,
 				YearBucket:    2018,
 			}
@@ -186,13 +186,13 @@ var _ = Describe("UserAggregate", func() {
 			Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
 			Expect(kr.Error).ToNot(BeEmpty())
 			Expect(kr.ErrorCode).To(Equal(int16(InternalError)))
-			Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+			Expect(kr.UUID).To(Equal(mockEvent.UUID))
 		})
 	})
 
 	Describe("update", func() {
 		It("should return error if filter is empty", func() {
-			timeUUID, err := uuuid.NewV1()
+			UUID, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
 			cid, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
@@ -206,13 +206,13 @@ var _ = Describe("UserAggregate", func() {
 			marshalArgs, err := json.Marshal(updateArgs)
 			Expect(err).ToNot(HaveOccurred())
 			mockEvent := &model.Event{
-				Action:        "delete",
+				EventAction:   "delete",
 				CorrelationID: cid,
 				AggregateID:   1,
 				Data:          marshalArgs,
-				Timestamp:     time.Now(),
+				NanoTime:      time.Now().UnixNano(),
 				UserUUID:      uid,
-				TimeUUID:      timeUUID,
+				UUID:          UUID,
 				Version:       3,
 				YearBucket:    2018,
 			}
@@ -221,11 +221,11 @@ var _ = Describe("UserAggregate", func() {
 			Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
 			Expect(kr.Error).ToNot(BeEmpty())
 			Expect(kr.ErrorCode).To(Equal(int16(InternalError)))
-			Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+			Expect(kr.UUID).To(Equal(mockEvent.UUID))
 		})
 
 		It("should return error if update is empty", func() {
-			timeUUID, err := uuuid.NewV1()
+			UUID, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
 			cid, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
@@ -241,13 +241,13 @@ var _ = Describe("UserAggregate", func() {
 			marshalArgs, err := json.Marshal(updateArgs)
 			Expect(err).ToNot(HaveOccurred())
 			mockEvent := &model.Event{
-				Action:        "delete",
+				EventAction:   "delete",
 				CorrelationID: cid,
 				AggregateID:   1,
 				Data:          marshalArgs,
-				Timestamp:     time.Now(),
+				NanoTime:      time.Now().UnixNano(),
 				UserUUID:      uid,
-				TimeUUID:      timeUUID,
+				UUID:          UUID,
 				Version:       3,
 				YearBucket:    2018,
 			}
@@ -256,11 +256,11 @@ var _ = Describe("UserAggregate", func() {
 			Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
 			Expect(kr.Error).ToNot(BeEmpty())
 			Expect(kr.ErrorCode).To(Equal(int16(InternalError)))
-			Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+			Expect(kr.UUID).To(Equal(mockEvent.UUID))
 		})
 
 		It("should return error if userID in update is empty", func() {
-			timeUUID, err := uuuid.NewV1()
+			UUID, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
 			cid, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
@@ -278,13 +278,13 @@ var _ = Describe("UserAggregate", func() {
 			marshalArgs, err := json.Marshal(updateArgs)
 			Expect(err).ToNot(HaveOccurred())
 			mockEvent := &model.Event{
-				Action:        "delete",
+				EventAction:   "delete",
 				CorrelationID: cid,
 				AggregateID:   1,
 				Data:          marshalArgs,
-				Timestamp:     time.Now(),
+				NanoTime:      time.Now().UnixNano(),
 				UserUUID:      uid,
-				TimeUUID:      timeUUID,
+				UUID:          UUID,
 				Version:       3,
 				YearBucket:    2018,
 			}
@@ -293,7 +293,7 @@ var _ = Describe("UserAggregate", func() {
 			Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
 			Expect(kr.Error).ToNot(BeEmpty())
 			Expect(kr.ErrorCode).To(Equal(int16(InternalError)))
-			Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+			Expect(kr.UUID).To(Equal(mockEvent.UUID))
 		})
 	})
 })

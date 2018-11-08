@@ -26,7 +26,9 @@ func Delete(collection *mongo.Collection, event *model.Event) *model.KafkaRespon
 			CorrelationID: event.CorrelationID,
 			Error:         err.Error(),
 			ErrorCode:     InternalError,
-			UUID:          event.TimeUUID,
+			EventAction:   event.EventAction,
+			ServiceAction: event.ServiceAction,
+			UUID:          event.UUID,
 		}
 	}
 
@@ -39,7 +41,9 @@ func Delete(collection *mongo.Collection, event *model.Event) *model.KafkaRespon
 			CorrelationID: event.CorrelationID,
 			Error:         err.Error(),
 			ErrorCode:     InternalError,
-			UUID:          event.TimeUUID,
+			EventAction:   event.EventAction,
+			ServiceAction: event.ServiceAction,
+			UUID:          event.UUID,
 		}
 	}
 
@@ -52,7 +56,9 @@ func Delete(collection *mongo.Collection, event *model.Event) *model.KafkaRespon
 			CorrelationID: event.CorrelationID,
 			Error:         err.Error(),
 			ErrorCode:     DatabaseError,
-			UUID:          event.TimeUUID,
+			EventAction:   event.EventAction,
+			ServiceAction: event.ServiceAction,
+			UUID:          event.UUID,
 		}
 	}
 
@@ -66,14 +72,18 @@ func Delete(collection *mongo.Collection, event *model.Event) *model.KafkaRespon
 			CorrelationID: event.CorrelationID,
 			Error:         err.Error(),
 			ErrorCode:     InternalError,
-			UUID:          event.TimeUUID,
+			EventAction:   event.EventAction,
+			ServiceAction: event.ServiceAction,
+			UUID:          event.UUID,
 		}
 	}
 
 	return &model.KafkaResponse{
 		AggregateID:   event.AggregateID,
 		CorrelationID: event.CorrelationID,
+		EventAction:   event.EventAction,
 		Result:        resultMarshal,
-		UUID:          event.TimeUUID,
+		ServiceAction: event.ServiceAction,
+		UUID:          event.UUID,
 	}
 }

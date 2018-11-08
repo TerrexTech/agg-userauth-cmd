@@ -100,16 +100,16 @@ var _ = Describe("UserAuthAggregate", func() {
 		Expect(err).ToNot(HaveOccurred())
 		uid, err := uuuid.NewV4()
 		Expect(err).ToNot(HaveOccurred())
-		timeUUID, err := uuuid.NewV1()
+		UUID, err := uuuid.NewV4()
 		Expect(err).ToNot(HaveOccurred())
 		mockEvent = &model.Event{
-			Action:        "insert",
+			EventAction:   "insert",
 			CorrelationID: cid,
 			AggregateID:   user.AggregateID,
 			Data:          marshalUser,
-			Timestamp:     time.Now(),
+			NanoTime:      time.Now().UnixNano(),
 			UserUUID:      uid,
-			TimeUUID:      timeUUID,
+			UUID:          UUID,
 			Version:       0,
 			YearBucket:    2018,
 		}
@@ -139,11 +139,11 @@ var _ = Describe("UserAuthAggregate", func() {
 				err := json.Unmarshal(msg.Value, kr)
 				Expect(err).ToNot(HaveOccurred())
 
-				if kr.UUID == mockEvent.TimeUUID {
+				if kr.UUID == mockEvent.UUID {
 					Expect(kr.Error).To(BeEmpty())
 					Expect(kr.ErrorCode).To(BeZero())
 					Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
-					Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+					Expect(kr.UUID).To(Equal(mockEvent.UUID))
 
 					user := &user.User{}
 					err = json.Unmarshal(kr.Result, user)
@@ -193,12 +193,12 @@ var _ = Describe("UserAuthAggregate", func() {
 			mockUser.ID = mockID
 
 			Byf("Creating update MockEvent")
-			timeUUID, err := uuuid.NewV1()
+			UUID, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
-			mockEvent.Action = "update"
+			mockEvent.EventAction = "update"
 			mockEvent.Data = marshalUpdate
-			mockEvent.Timestamp = time.Now()
-			mockEvent.TimeUUID = timeUUID
+			mockEvent.NanoTime = time.Now().UnixNano()
+			mockEvent.UUID = UUID
 
 			Byf("Producing MockEvent")
 			p, err := kafka.NewProducer(&kafka.ProducerConfig{
@@ -222,11 +222,11 @@ var _ = Describe("UserAuthAggregate", func() {
 				err := json.Unmarshal(msg.Value, kr)
 				Expect(err).ToNot(HaveOccurred())
 
-				if kr.UUID == mockEvent.TimeUUID {
+				if kr.UUID == mockEvent.UUID {
 					Expect(kr.Error).To(BeEmpty())
 					Expect(kr.ErrorCode).To(BeZero())
 					Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
-					Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+					Expect(kr.UUID).To(Equal(mockEvent.UUID))
 
 					result := map[string]int{}
 					err = json.Unmarshal(kr.Result, &result)
@@ -265,12 +265,12 @@ var _ = Describe("UserAuthAggregate", func() {
 			Expect(err).ToNot(HaveOccurred())
 
 			Byf("Creating delete MockEvent")
-			timeUUID, err := uuuid.NewV1()
+			UUID, err := uuuid.NewV4()
 			Expect(err).ToNot(HaveOccurred())
-			mockEvent.Action = "delete"
+			mockEvent.EventAction = "delete"
 			mockEvent.Data = marshalDelete
-			mockEvent.Timestamp = time.Now()
-			mockEvent.TimeUUID = timeUUID
+			mockEvent.NanoTime = time.Now().UnixNano()
+			mockEvent.UUID = UUID
 
 			Byf("Producing MockEvent")
 			p, err := kafka.NewProducer(&kafka.ProducerConfig{
@@ -294,11 +294,11 @@ var _ = Describe("UserAuthAggregate", func() {
 				err := json.Unmarshal(msg.Value, kr)
 				Expect(err).ToNot(HaveOccurred())
 
-				if kr.UUID == mockEvent.TimeUUID {
+				if kr.UUID == mockEvent.UUID {
 					Expect(kr.Error).To(BeEmpty())
 					Expect(kr.ErrorCode).To(BeZero())
 					Expect(kr.CorrelationID).To(Equal(mockEvent.CorrelationID))
-					Expect(kr.UUID).To(Equal(mockEvent.TimeUUID))
+					Expect(kr.UUID).To(Equal(mockEvent.UUID))
 
 					result := map[string]int{}
 					err = json.Unmarshal(kr.Result, &result)
