@@ -1,46 +1,26 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"strconv"
 
-	"github.com/TerrexTech/agg-userauth-cmd/user"
+	"github.com/TerrexTech/agg-userauth-cmd/command"
+	"github.com/TerrexTech/agg-userauth-cmd/util"
+	"github.com/TerrexTech/agg-userauth-model/user"
+	"github.com/TerrexTech/go-agg-builder/builder"
 	"github.com/TerrexTech/go-commonutils/commonutil"
-	"github.com/TerrexTech/go-eventspoll/poll"
+	"github.com/TerrexTech/go-kafkautils/kafka"
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
 )
 
-func validateEnv() error {
-	missingVar, err := commonutil.ValidateEnv(
-		"KAFKA_BROKERS",
-
-		"KAFKA_CONSUMER_EVENT_GROUP",
-		"KAFKA_CONSUMER_EVENT_QUERY_GROUP",
-
-		"KAFKA_CONSUMER_EVENT_TOPIC",
-		"KAFKA_CONSUMER_EVENT_QUERY_TOPIC",
-		"KAFKA_PRODUCER_EVENT_QUERY_TOPIC",
-		"KAFKA_PRODUCER_RESPONSE_TOPIC",
-
-		"MONGO_HOSTS",
-		"MONGO_DATABASE",
-		"MONGO_AGG_COLLECTION",
-		"MONGO_META_COLLECTION",
-
-		"MONGO_CONNECTION_TIMEOUT_MS",
-		"MONGO_RESOURCE_TIMEOUT_MS",
-	)
-
-	if err != nil {
-		err = errors.Wrapf(err, "Env-var %s is required for testing, but is not set", missingVar)
-		return err
-	}
-	return nil
-}
-
-func main() {
-	log.Println("Reading environment file")
-	err := godotenv.Load("./.env")
+// validateEnv checks if all required environment-variables are set.
+func validateEnv() {
+	// Load environment-file.
+	// Env vars will be read directly from environment if this file fails loading
+	err := godotenv.Load()
 	if err != nil {
 		err = errors.Wrap(err,
 			".env file not found, env-vars will be read as set in environment",
@@ -48,93 +28,150 @@ func main() {
 		log.Println(err)
 	}
 
-	err = validateEnv()
+	missingVar, err := commonutil.ValidateEnv(
+		"SERVICE_NAME",
+
+		"KAFKA_BROKERS",
+
+		"KAFKA_CONSUMER_GROUP_REQUEST",
+		"KAFKA_CONSUMER_TOPIC_REQUEST",
+
+		"KAFKA_CONSUMER_GROUP_ESRESP",
+		"KAFKA_CONSUMER_TOPIC_ESRESP",
+
+		"KAFKA_PRODUCER_TOPIC_ESREQ",
+		"KAFKA_PRODUCER_TOPIC_EVENTS",
+
+		"KAFKA_END_OF_STREAM_TOKEN",
+
+		"MONGO_HOSTS",
+		"MONGO_USERNAME",
+		"MONGO_PASSWORD",
+
+		"MONGO_DATABASE",
+		"MONGO_AGG_COLLECTION",
+		"MONGO_META_COLLECTION",
+
+		"MONGO_CONNECTION_TIMEOUT_MS",
+	)
+
 	if err != nil {
+		err = errors.Wrapf(err, "Env-var %s is required, but is not set", missingVar)
 		log.Fatalln(err)
+	}
+}
+
+func main() {
+	validateEnv()
+
+	kafkaBrokersStr := os.Getenv("KAFKA_BROKERS")
+	kafkaBrokers := *commonutil.ParseHosts(kafkaBrokersStr)
+
+	kafkaProdConfig := &kafka.ProducerConfig{
+		KafkaBrokers: kafkaBrokers,
 	}
 
-	kc, err := loadKafkaConfig()
-	if err != nil {
-		err = errors.Wrap(err, "Error in KafkaConfig")
-		log.Fatalln(err)
-	}
-	mc, err := loadMongoConfig()
-	if err != nil {
-		err = errors.Wrap(err, "Error in MongoConfig")
-		log.Fatalln(err)
-	}
-	ioConfig := poll.IOConfig{
-		ReadConfig: poll.ReadConfig{
-			EnableInsert: true,
-			EnableUpdate: true,
-			EnableDelete: true,
+	// KafkaConfig for Agg-Builder
+	esQueryRespTopic := fmt.Sprintf(
+		"%s.%d",
+		os.Getenv("KAFKA_CONSUMER_TOPIC_ESRESP"),
+		user.AggregateID,
+	)
+	esQueryRespGroup := os.Getenv("KAFKA_CONSUMER_TOPIC_ESRESP")
+	esQueryReqTopic := os.Getenv("KAFKA_PRODUCER_TOPIC_ESREQ")
+	eosToken := os.Getenv("KAFKA_END_OF_STREAM_TOKEN")
+	kc := builder.KafkaConfig{
+		ESQueryResCons: &kafka.ConsumerConfig{
+			KafkaBrokers: kafkaBrokers,
+			Topics:       []string{esQueryRespTopic},
+			GroupName:    esQueryRespGroup,
 		},
-		KafkaConfig: *kc,
-		MongoConfig: *mc,
+		ESQueryReqProd:  kafkaProdConfig,
+		ESQueryReqTopic: esQueryReqTopic,
+		EOSToken:        eosToken,
 	}
 
-	eventPoll, err := poll.Init(ioConfig)
+	// Mongo Config
+	mc, err := util.LoadMongoConfig()
 	if err != nil {
-		err = errors.Wrap(err, "Error creating EventPoll service")
+		err = errors.Wrap(err, "Error initializing MongoConfig")
+		log.Fatalln(err)
+	}
+	eventsIO, err := builder.Init(builder.IOConfig{
+		KafkaConfig: kc,
+		MongoConfig: *mc,
+	})
+	if err != nil {
+		err = errors.Wrap(err, "Error initializing Aggregate-eventsIO")
 		log.Fatalln(err)
 	}
 
-	for {
-		select {
-		case err := <-eventPoll.Wait():
-			err = errors.New("service-context closed")
-			log.Fatalln(err)
+	prodConfig := &producerConfig{
+		ctx:         eventsIO.Context(),
+		kafkaConfig: kafkaProdConfig,
+		g:           eventsIO.ErrGroup(),
+	}
+	// Event Producer
+	eventsTopic := os.Getenv("KAFKA_PRODUCER_TOPIC_EVENTS")
+	eventChan, err := eventProducer(prodConfig, eventsTopic)
+	if err != nil {
+		err = errors.Wrap(err, "Error creating EventProducer")
+		log.Fatalln(err)
+	}
+	// Response Producer
+	respChan, err := respProducer(prodConfig)
+	if err != nil {
+		err = errors.Wrap(err, "Error creating ResponseProducer")
+		log.Fatalln(err)
+	}
 
-		case eventResp := <-eventPoll.Delete():
-			go func(eventResp *poll.EventResponse) {
-				if eventResp == nil {
-					return
-				}
-				err := eventResp.Error
-				if err != nil {
-					err = errors.Wrap(err, "Error in Delete-EventResponse")
-					log.Println(err)
-					return
-				}
-				kafkaResp := user.Delete(mc.AggCollection, &eventResp.Event)
-				if kafkaResp != nil {
-					eventPoll.ProduceResult() <- kafkaResp
-				}
-			}(eventResp)
+	// Command Handler
+	serviceName := os.Getenv("SERVICE_NAME")
+	cmdHandler, err := command.NewHandler(&command.HandlerConfig{
+		Coll:        mc.AggCollection,
+		ServiceName: serviceName,
+		EventProd:   eventChan,
+		ResultProd:  respChan,
+	})
+	if err != nil {
+		err = errors.Wrap(err, "Error initializing command-handler")
+		log.Fatalln(err)
+	}
 
-		case eventResp := <-eventPoll.Insert():
-			go func(eventResp *poll.EventResponse) {
-				if eventResp == nil {
-					return
-				}
-				err := eventResp.Error
-				if err != nil {
-					err = errors.Wrap(eventResp.Error, "Error in Insert-EventResponse")
-					log.Println(err)
-					return
-				}
-				kafkaResp := user.Insert(mc.AggCollection, &eventResp.Event)
-				if kafkaResp != nil {
-					eventPoll.ProduceResult() <- kafkaResp
-				}
-			}(eventResp)
+	// Command Consumer
+	cmdConsGroup := os.Getenv("KAFKA_CONSUMER_GROUP_REQUEST")
+	cmdConsTopic := os.Getenv("KAFKA_CONSUMER_TOPIC_REQUEST")
+	cmdCons, err := kafka.NewConsumer(&kafka.ConsumerConfig{
+		KafkaBrokers: kafkaBrokers,
+		GroupName:    cmdConsGroup,
+		Topics:       []string{cmdConsTopic},
+	})
+	if err != nil {
+		err = errors.Wrap(err, "Error creating consumer")
+		log.Fatalln(err)
+	}
 
-		case eventResp := <-eventPoll.Update():
-			go func(eventResp *poll.EventResponse) {
-				if eventResp == nil {
-					return
-				}
-				err := eventResp.Error
-				if err != nil {
-					err = errors.Wrap(err, "Error in Update-EventResponse")
-					log.Println(err)
-					return
-				}
-				kafkaResp := user.Update(mc.AggCollection, &eventResp.Event)
-				if kafkaResp != nil {
-					eventPoll.ProduceResult() <- kafkaResp
-				}
-			}(eventResp)
-		}
+	builderTimeoutSecStr := os.Getenv("AGG_BUILDER_TIMEOUT_SEC")
+	builderTimeoutSec, err := strconv.Atoi(builderTimeoutSecStr)
+	if err != nil {
+		err = errors.Wrap(err, "Error converting AGG_BUILDER_TIMEOUT_SEC to integer")
+		log.Println(err)
+		log.Println("A defalt value of 5 will be used for AGG_BUILDER_TIMEOUT_SEC")
+		builderTimeoutSec = 5
+	}
+	handler, err := newCmdConsumer(cmdConsConfig{
+		collection:        mc.AggCollection,
+		builderFunc:       eventsIO.BuildState,
+		builderTimeoutSec: builderTimeoutSec,
+		handle:            cmdHandler.Handle,
+	})
+	if err != nil {
+		err = errors.Wrap(err, "Error initializing Cmd-Handler")
+		log.Fatalln(err)
+	}
+	err = cmdCons.Consume(eventsIO.Context(), handler)
+	if err != nil {
+		err = errors.Wrap(err, "Error while attempting to consume Commands")
+		log.Fatalln(err)
 	}
 }

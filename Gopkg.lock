@@ -10,31 +10,36 @@
   version = "v1.19.0"
 
 [[projects]]
+  digest = "1:29a972026b847e69c0772addafef145753842aeb656d95d44224366b52487432"
+  name = "github.com/TerrexTech/agg-userauth-model"
+  packages = ["user"]
+  pruneopts = "UT"
+  revision = "7ed9a0ca1ffe49f0eaaaac88aefc3592536cb3ea"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:20928a78f0c1177988f8c1761b33ea2f5738acc692268384cfe06f41307fe0e9"
+  name = "github.com/TerrexTech/go-agg-builder"
+  packages = ["builder"]
+  pruneopts = "UT"
+  revision = "fcf118ca192bd287b158a904b0e28f094ffafe4c"
+  version = "v2.0.0"
+
+[[projects]]
+  digest = "1:cfc553aea6ed5498df3c05f139ad0a0c7345bfaf595902d6c02fe5fc72f5aeb6"
+  name = "github.com/TerrexTech/go-common-models"
+  packages = ["model"]
+  pruneopts = "UT"
+  revision = "4fb8fe6f5ae0bf1006f9b268de7a26ed7e0f65d9"
+  version = "v2.0.0"
+
+[[projects]]
   digest = "1:9e040726ee775fa241bf96d3c11533a5312d9bcb00a594b63679bff456a4522c"
   name = "github.com/TerrexTech/go-commonutils"
   packages = ["commonutil"]
   pruneopts = "UT"
   revision = "3d09c974f936d001def7acafb178d99f317ee3a9"
   version = "v3.1.0"
-
-[[projects]]
-  digest = "1:b374152c0b4b0dff7c0236ed48d0fdee003e009876dbd7cb642d9b4a7f884f2b"
-  name = "github.com/TerrexTech/go-eventspoll"
-  packages = [
-    "errors",
-    "poll",
-  ]
-  pruneopts = "UT"
-  revision = "c2c40a442eab5325df33f65f6d7aacfee5bbf944"
-  version = "v4.0.0"
-
-[[projects]]
-  digest = "1:4d3876e2ce747cfeded59a1210056e894d2593b73e843454a19d7f845afad23e"
-  name = "github.com/TerrexTech/go-eventstore-models"
-  packages = ["model"]
-  pruneopts = "UT"
-  revision = "4d0913b6357bca72d45064058f63c02d20c9e2c0"
-  version = "v4.0.0"
 
 [[projects]]
   digest = "1:017b08c994a864ea4e94f1837037c14087f784a1e99d54173eba9050f7a81f74"
@@ -62,11 +67,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8500725e4a8fd006069df505505e0c370466b0952db1174235d7935e34e6df0b"
+  digest = "1:69e7139f6d546cc6ffc9ca98e7f4cfe95be479f4044eb30bb92017b5b87c9d40"
   name = "github.com/buger/jsonparser"
   packages = ["."]
   pruneopts = "UT"
-  revision = "52c6e1462ebdfb4f59765ca13bd8fa1c31b1d7eb"
+  revision = "bf1c66bbce23153d89b23f8960071a680dbef54b"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -110,7 +115,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:348bbd07b4a983b2f811f81948c78142de09bb9fcf25284bee5e2ab3bdd0f6f9"
+  digest = "1:1a5f28249f1a5b118994359a1c7b8c53ee1ff47aa7fe65884fbd20cd237001f4"
   name = "github.com/gocql/gocql"
   packages = [
     ".",
@@ -119,7 +124,7 @@
     "internal/streams",
   ]
   pruneopts = "UT"
-  revision = "68ae1e384be4d7cd7df0f5b77f331759d806308e"
+  revision = "70385f88b28b43805bd83d212169ab2d38810b15"
 
 [[projects]]
   digest = "1:c594a691090b434d55c67f6cc8e326ef5ba49452abc059821bd5d4fd4cdef08c"
@@ -228,7 +233,7 @@
   version = "v0.0.14"
 
 [[projects]]
-  digest = "1:42e29deef12327a69123b9cb2cb45fee4af5c12c2a23c6e477338279a052703f"
+  digest = "1:5f4b78246f0bcb105b1e3b2b9e22b52a57cd02f57a8078572fe27c62f4a75ff7"
   name = "github.com/onsi/ginkgo"
   packages = [
     ".",
@@ -251,11 +256,11 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "3774a09d95489ccaa16032e0770d08ea77ba6184"
-  version = "v1.6.0"
+  revision = "2e1be8f7d90e9d3e3e58b0ce470f2f14d075406f"
+  version = "v1.7.0"
 
 [[projects]]
-  digest = "1:ab54eea8d482272009e9e4af07d4d9b5236c27b4d8c54a3f2c99d163be883eca"
+  digest = "1:7a137fb7718928e473b7d805434ae563ec41790d3d227cdc64e8b14d1cab8a1f"
   name = "github.com/onsi/gomega"
   packages = [
     ".",
@@ -272,8 +277,8 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "7615b9433f86a8bdf29709bf288bc4fd0636a369"
-  version = "v1.4.2"
+  revision = "65fb64232476ad9046e57c26cd0bff3d3a8dc6cd"
+  version = "v1.4.3"
 
 [[projects]]
   digest = "1:e39a5ee8fcbec487f8fc68863ef95f2b025e0739b0e4aa55558a2b4cf8f0ecf0"
@@ -320,11 +325,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f92f6956e4059f6a3efc14924d2dd58ba90da25cc57fe07ae3779ef2f5e0c5f2"
+  digest = "1:318fbcf92cf6f5f01a8e28059612a09671e8d446c1be41020171dd3eeb3dfb9e"
   name = "golang.org/x/crypto"
-  packages = ["pbkdf2"]
+  packages = [
+    "bcrypt",
+    "blowfish",
+    "pbkdf2",
+  ]
   pruneopts = "UT"
-  revision = "e4dc69e5b2fd71dcaf8bd5d054eb936deb78d1fa"
+  revision = "e657309f52e71501f9934566ac06dc5c2f7f11a1"
 
 [[projects]]
   branch = "master"
@@ -336,7 +345,7 @@
     "html/charset",
   ]
   pruneopts = "UT"
-  revision = "1c5f79cfb1642860bbe00b6cfce66700c01e04f6"
+  revision = "adae6a3d119ae4890b46832a2e88a95adc62b8e7"
 
 [[projects]]
   branch = "master"
@@ -351,11 +360,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7ba061af4131fb44b30448572acd0d6fefbf63a61b97b7ef1dea0be5871c2742"
+  digest = "1:225564f71149334315118db714e1ea87513e4a11cf4acb27e26bc7577cebfa0b"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399"
+  revision = "62eef0e2fa9b2c385f7b2778e763486da6880d37"
 
 [[projects]]
   digest = "1:4392fcf42d5cf0e3ff78c96b2acf8223d49e4fdc53eb77c99d2f8dfe4680e006"
@@ -424,18 +433,19 @@
   analyzer-version = 1
   input-imports = [
     "github.com/Shopify/sarama",
+    "github.com/TerrexTech/agg-userauth-model/user",
+    "github.com/TerrexTech/go-agg-builder/builder",
+    "github.com/TerrexTech/go-common-models/model",
     "github.com/TerrexTech/go-commonutils/commonutil",
-    "github.com/TerrexTech/go-eventspoll/poll",
-    "github.com/TerrexTech/go-eventstore-models/model",
     "github.com/TerrexTech/go-kafkautils/kafka",
     "github.com/TerrexTech/go-mongoutils/mongo",
     "github.com/TerrexTech/uuuid",
     "github.com/joho/godotenv",
-    "github.com/mongodb/mongo-go-driver/bson",
-    "github.com/mongodb/mongo-go-driver/bson/objectid",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
+    "golang.org/x/crypto/bcrypt",
+    "golang.org/x/sync/errgroup",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,7 +1,7 @@
 UserAuth Aggregate - Command
 ---
 
-This service handles `delete`, `insert`, and `update` events for UserAuth Aggregate.
+This service handles `delete`, `insert`, and `update` commands for UserAuth Aggregate.
 
 Check included [docker-compose.yaml][0] and [run_test.sh][1] for sample run-configuration for this service.
 

@@ -1,47 +1,25 @@
-package main
+package util
 
 import (
 	"log"
 	"os"
 	"strconv"
 
-	"github.com/TerrexTech/agg-userauth-cmd/user"
-
+	"github.com/TerrexTech/agg-userauth-model/user"
+	"github.com/TerrexTech/go-agg-builder/builder"
 	"github.com/TerrexTech/go-commonutils/commonutil"
-	"github.com/TerrexTech/go-eventspoll/poll"
 	"github.com/TerrexTech/go-mongoutils/mongo"
 	"github.com/pkg/errors"
 )
 
-func loadMongoConfig() (*poll.MongoConfig, error) {
-	conn, err := getMongoConn()
-	if err != nil {
-		log.Fatalln(err)
-	}
+func LoadMongoConfig() (*builder.MongoConfig, error) {
+	hosts := *commonutil.ParseHosts(
+		os.Getenv("MONGO_HOSTS"),
+	)
 
 	database := os.Getenv("MONGO_DATABASE")
 	aggCollection := os.Getenv("MONGO_AGG_COLLECTION")
 	metaCollection := os.Getenv("MONGO_META_COLLECTION")
-
-	aggMongoCollection, err := createMongoCollection(conn, database, aggCollection)
-	if err != nil {
-		err = errors.Wrap(err, "Error creating MongoCollection")
-		return nil, err
-	}
-
-	return &poll.MongoConfig{
-		AggregateID:        user.AggregateID,
-		AggCollection:      aggMongoCollection,
-		Connection:         conn,
-		MetaDatabaseName:   database,
-		MetaCollectionName: metaCollection,
-	}, nil
-}
-
-func getMongoConn() (*mongo.ConnectionConfig, error) {
-	hosts := *commonutil.ParseHosts(
-		os.Getenv("MONGO_HOSTS"),
-	)
 
 	username := os.Getenv("MONGO_USERNAME")
 	password := os.Getenv("MONGO_PASSWORD")
@@ -65,7 +43,7 @@ func getMongoConn() (*mongo.ConnectionConfig, error) {
 	client, err := mongo.NewClient(mongoConfig)
 	if err != nil {
 		err = errors.Wrap(err, "Error creating MongoClient")
-		return nil, err
+		log.Fatalln(err)
 	}
 
 	resTimeoutStr := os.Getenv("MONGO_CONNECTION_TIMEOUT_MS")
@@ -74,14 +52,26 @@ func getMongoConn() (*mongo.ConnectionConfig, error) {
 		err = errors.Wrap(err, "Error converting MONGO_RESOURCE_TIMEOUT_MS to integer")
 		log.Println(err)
 		log.Println("A defalt value of 5000 will be used for MONGO_RESOURCE_TIMEOUT_MS")
-		connTimeout = 5000
+		resTimeout = 5000
 	}
 	conn := &mongo.ConnectionConfig{
 		Client:  client,
 		Timeout: uint32(resTimeout),
 	}
 
-	return conn, nil
+	aggMongoCollection, err := createMongoCollection(conn, database, aggCollection)
+	if err != nil {
+		err = errors.Wrap(err, "Error creating MongoCollection")
+		return nil, err
+	}
+
+	return &builder.MongoConfig{
+		AggregateID:        user.AggregateID,
+		AggCollection:      aggMongoCollection,
+		Connection:         conn,
+		MetaDatabaseName:   database,
+		MetaCollectionName: metaCollection,
+	}, nil
 }
 
 func createMongoCollection(
@@ -110,14 +100,13 @@ func createMongoCollection(
 	}
 
 	// Create New Collection
-	c := &mongo.Collection{
+	collection, err := mongo.EnsureCollection(&mongo.Collection{
 		Connection:   conn,
 		Database:     db,
 		Name:         coll,
 		SchemaStruct: &user.User{},
 		Indexes:      indexConfigs,
-	}
-	collection, err := mongo.EnsureCollection(c)
+	})
 	if err != nil {
 		err = errors.Wrap(err, "Error creating MongoCollection")
 		return nil, err
